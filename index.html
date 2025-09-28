@@ -8817,6 +8817,24 @@
     user-select: none;
 }
 /* ▲▲▲ 新增CSS结束 ▲▲▲ */
+/* ▼▼▼ 【全新】这是为弹窗内可滚动长文本添加的样式 ▼▼▼ */
+.scrollable-content-preview {
+    /* 核心1：设置一个最大高度。内容超出这个高度就会触发滚动。
+       35vh 表示视窗高度的35%，这是一个灵活的高度，能适应不同屏幕。*/
+    max-height: 35vh;
+    
+    /* 核心2：当内容垂直方向溢出时，自动显示滚动条。 */
+    overflow-y: auto;
+    
+    /* (可选) 美化样式，让它看起来更像一个代码/引用块 */
+    background-color: #f0f2f5;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: left;
+    white-space: pre-wrap; /* 保持文本中的换行 */
+    border: 1px solid var(--border-color);
+}
+/* ▲▲▲ 新增CSS结束 ▲▲▲ */
     </style>
 </head>
 <body>
@@ -23838,10 +23856,10 @@ ${memoryContent}
                     
                     // ▼▼▼ 核心修改2：不再立即保存，而是弹出新的确认框让用户审核 ▼▼▼
                     const userConfirmedReplacement = await showCustomConfirm(
-                        '精炼完成，请确认',
-                        `AI已将您的 ${originalMemoryCount} 条旧记忆总结为以下核心记忆：<br><br><p style="background-color:#f0f0f0; padding:10px; border-radius:8px; text-align: left; white-space: pre-wrap;">${result.summary.trim()}</p><br>是否用这条新记忆替换掉旧的记忆？`,
-                        { confirmText: '确认替换', cancelText: '保留旧的', confirmButtonClass: 'btn-danger' }
-                    );
+    '精炼完成，请确认',
+    `AI已将您的 ${originalMemoryCount} 条旧记忆总结为以下核心记忆：<br><br><div class="scrollable-content-preview">${result.summary.trim()}</div><br>是否用这条新记忆替换掉旧的记忆？`,
+    { confirmText: '确认替换', cancelText: '保留旧的', confirmButtonClass: 'btn-danger' }
+);
 
                     // ▼▼▼ 核心修改3：只有当用户明确点击“确认替换”后，才执行覆盖操作 ▼▼▼
                     if (userConfirmedReplacement) {
