@@ -26972,7 +26972,8 @@ ${formattedHistory}
                     }
                 }
                 if (memoriesAddedCount > 0) {
-                    await showCustomAlert('总结成功', `已成功为 ${memoriesAddedCount} 位群成员生成并注入了个性化记忆！`);
+                    // *** 修改点 1：移除弹窗，改为在控制台输出日志 ***
+                    console.log(`自动总结成功：为 ${memoriesAddedCount} 位群成员生成并注入了个性化记忆！`);
                 } else {
                     throw new Error("AI返回了空的或格式不正确的总结内容。");
                 }
@@ -26980,17 +26981,16 @@ ${formattedHistory}
                 throw new Error("AI返回的JSON格式不正确，缺少 'summaries' 字段。");
             }
         } else {
-            // --- 这是单聊的“统一客观记忆”逻辑 ---
             if (result.summary && result.summary.trim()) {
                 const newMemoryEntry = { content: result.summary.trim(), timestamp: Date.now(), source: 'auto' };
                 chat.longTermMemory.push(newMemoryEntry);
                 await db.chats.put(chat);
-                await showCustomAlert('总结成功', `已成功添加 1 条新的长期记忆！`);
+                // *** 修改点 2：移除弹窗，改为在控制台输出日志 ***
+                console.log('自动总结成功：已成功添加 1 条新的长期记忆！');
             } else {
                 throw new Error("AI返回了空的或格式不正确的总结内容。");
             }
         }
-        // ▲▲▲ 修改结束 ▲▲▲
 
         chat.lastMemorySummaryTimestamp = messagesToSummarize.slice(-1)[0].timestamp;
         await db.chats.put(chat);
@@ -27000,6 +27000,7 @@ ${formattedHistory}
         }
     } catch (error) {
         console.error("总结长期记忆时出错:", error);
+        // *** 修改点 3：失败时依然弹出错误提示 ***
         await showCustomAlert('总结失败', `操作失败: ${error.message}`);
     }
 }
@@ -39618,7 +39619,15 @@ function formatReadingStateForAI(chatId) {
     return `
     - **书名**: 《${title}》
     - **${contextLabel}**: "${contentForAI}..."
-    - **你的任务**: 你的回复【必须】与当前正在阅读的书籍内容或读书这件事本身相关。你可以发表感想、提出问题、或者讨论相关情节。`;
+    #一起读书模式 | 行为铁律
+    1.  **角色定位**: 你【不是】书中的任何角色，你是【你自己】(${state.chats[chatId]?.originalName || 'AI角色'})，正在和用户一起【阅读和讨论】这本书。
+    2.  **行为准则**: 你的回复【必须】是作为读者的【感想、评论、提问或联想】。你可以：
+        -   分享你对当前段落的看法。
+        -   对书中的角色或情节发表评论。
+        -   向用户提问，询问TA对内容的看法。
+        -   根据书本内容，联想到你自己的经历或记忆。
+    3.  **严禁**: 你的回复【绝对禁止】使用书中角色的口吻和人称！【绝对禁止】扮演书中的任何角色！【绝对禁止】续写或模仿书中的情节！你必须时刻记住，你只是一个读者。    
+`;
 }
 
 // ▲▲▲ 替换结束 ▲▲▲
